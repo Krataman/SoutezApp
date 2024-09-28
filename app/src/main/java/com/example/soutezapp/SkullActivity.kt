@@ -30,6 +30,7 @@ class SkullActivity : AppCompatActivity() {
     val pieceSize = 200 // Velikost jednoho puclíku
     private val puzzlePiecesList = mutableListOf<PuzzlePiece>() // Seznam puclíků
 
+    //region onCreate
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,6 +74,7 @@ class SkullActivity : AppCompatActivity() {
 
             imageView.setOnTouchListener { v, event ->
                 when (event.action) {
+                    //region ACTION_DOWN
                     MotionEvent.ACTION_DOWN -> {
                         (puzzlePiecesContainer.parent as HorizontalScrollView).requestDisallowInterceptTouchEvent(true)
                         dX = v.x - event.rawX
@@ -80,6 +82,8 @@ class SkullActivity : AppCompatActivity() {
                         selectedPiece = v as ImageView
                         true
                     }
+                    //endregion
+                    //region ACTION_MOVE
                     MotionEvent.ACTION_MOVE -> {
                         if (selectedPiece != null) {
                             val newX = event.rawX + dX
@@ -89,6 +93,8 @@ class SkullActivity : AppCompatActivity() {
                         }
                         true
                     }
+                    //endregion
+                    //region ACTION_UP
                     MotionEvent.ACTION_UP -> {
                         if (selectedPiece != null) {
                             val x = event.rawX
@@ -131,13 +137,15 @@ class SkullActivity : AppCompatActivity() {
                         }
                         true
                     }
+                    //endregion
                     else -> false
                 }
             }
             puzzlePiecesContainer.addView(imageView)
         }
     }
-
+    //endregion
+    //region splitImage
     // Funkce pro rozdělení obrázku na řádky a sloupce
     private fun splitImage(image: Bitmap, rows: Int, cols: Int): List<Bitmap> {
         val pieceWidth = image.width / cols
@@ -158,4 +166,5 @@ class SkullActivity : AppCompatActivity() {
         }
         return pieces
     }
+    //endregion
 }
