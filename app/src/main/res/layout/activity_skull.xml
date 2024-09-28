@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -17,9 +16,14 @@
             android:id="@+id/gameBoard"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/material_dynamic_neutral20" />
+            android:background="@color/white">
+
+            <com.example.soutezapp.GridLinesView
+                android:id="@+id/gridLinesView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
     </LinearLayout>
-        <!-- Hrací pole -->
 
     <!-- Lišta s puclíky -->
     <HorizontalScrollView
