@@ -27,8 +27,8 @@ class SkullActivity : AppCompatActivity() {
     private var dX = 0f
     private var dY = 0f
 
-    val gridSize = 4 // Počet řádků a sloupců
-    val pieceSize = 200 // Velikost jednoho puclíku
+    val gridSize = 5 // Počet řádků a sloupců
+    val pieceSize = 150 // Velikost jednoho puclíku
     private val puzzlePiecesList = mutableListOf<PuzzlePiece>() // Seznam puclíků
 
     //region onCreate

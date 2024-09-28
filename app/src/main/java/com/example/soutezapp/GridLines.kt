@@ -18,8 +18,8 @@ class GridLinesView(context: Context, attrs: AttributeSet?) : View(context, attr
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        val numColumns = 4
-        val numRows = 4
+        val numColumns = 5
+        val numRows = 5
 
         val cellWidth = width / numColumns
         val cellHeight = height / numRows
