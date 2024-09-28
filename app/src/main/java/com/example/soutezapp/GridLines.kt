@@ -11,7 +11,7 @@ class GridLinesView(context: Context, attrs: AttributeSet?) : View(context, attr
     private val paint = Paint()
 
     init {
-        paint.color = Color.RED // Barva mřížky
+        paint.color = Color.BLACK // Barva mřížky
         paint.strokeWidth = 5f // Tloušťka čar
     }
 

@@ -105,13 +105,12 @@ class SkullActivity : AppCompatActivity() {
                             gameBoard.getLocationOnScreen(location)
 
                             // Zkontrolujeme, zda je puclík umístěn v hracím poli
-                            if (x >= location[0] && x <= (location[0] + gameBoard.width) &&
-                                y >= location[1] && y <= (location[1] + gameBoard.height)) {
+                            if (x >= location[0] && x <= (location[0] + gameBoard.width) && y >= location[1] && y <= (location[1] + gameBoard.height)) {
 
                                 val column = ((x - location[0]) / pieceSize).toInt()
                                 val row = ((y - location[1]) / pieceSize).toInt()
 
-                                val snappedX = location[0] + column * pieceSize
+                                val snappedX = location[1] + column * pieceSize
                                 val snappedY = location[1] + row * pieceSize
 
                                 val gamePiece = ImageView(this)
