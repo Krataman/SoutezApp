@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
+
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
@@ -52,13 +53,13 @@ class SkullActivity : AppCompatActivity() {
         boardLayoutParams.height = gridSize * pieceSize
         gameBoard.layoutParams = boardLayoutParams
 
-        for (piece in puzzlePieces) {
+        for ((index, piece) in puzzlePieces.withIndex()) {
             val imageView = ImageView(this)
             imageView.setImageBitmap(piece)
 
             // Uložení původní pozice
-            val originalX = (pieceSize * puzzlePieces.indexOf(piece)) + 10 * puzzlePieces.indexOf(piece)
-            val originalY = 0f // nebo nastavte na nějakou vhodnou hodnotu
+            val originalX = index * (pieceSize + 21)
+            val originalY = 1f // nebo nastavte na nějakou vhodnou hodnotu
 
             puzzlePiecesList.add(PuzzlePiece(imageView, originalX.toFloat(), originalY))
 
@@ -128,7 +129,7 @@ class SkullActivity : AppCompatActivity() {
                                 puzzlePieceData?.let {
                                     selectedPiece!!.animate()
                                         .x(it.originalX)
-                                        .y(it.originalY)
+                                        .y(it.originalY + 10)
                                         .setDuration(200)
                                         .start()
                                 }
