@@ -12,7 +12,7 @@ class GridLinesView(context: Context, attrs: AttributeSet?) : View(context, attr
 
     init {
         paint.color = Color.RED // Barva mřížky
-        paint.strokeWidth = 10f // Tloušťka čar
+        paint.strokeWidth = 5f // Tloušťka čar
     }
 
     override fun onDraw(canvas: Canvas) {

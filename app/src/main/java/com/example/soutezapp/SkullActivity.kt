@@ -6,16 +6,18 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.MotionEvent
-import android.view.View
 import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.drawable.toBitmap
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+
+data class PuzzlePiece(
+    val imageView: ImageView,
+    val originalX: Float,
+    val originalY: Float
+)
 
 class SkullActivity : AppCompatActivity() {
 
@@ -23,8 +25,10 @@ class SkullActivity : AppCompatActivity() {
     private lateinit var gameBoard: FrameLayout
     private var dX = 0f
     private var dY = 0f
+
     val gridSize = 4 // Počet řádků a sloupců
     val pieceSize = 200 // Velikost jednoho puclíku
+    private val puzzlePiecesList = mutableListOf<PuzzlePiece>() // Seznam puclíků
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,6 +54,12 @@ class SkullActivity : AppCompatActivity() {
         for (piece in puzzlePieces) {
             val imageView = ImageView(this)
             imageView.setImageBitmap(piece)
+
+            // Uložení původní pozice
+            val originalX = (pieceSize * puzzlePieces.indexOf(piece)) + 10 * puzzlePieces.indexOf(piece)
+            val originalY = 0f // nebo nastavte na nějakou vhodnou hodnotu
+
+            puzzlePiecesList.add(PuzzlePiece(imageView, originalX.toFloat(), originalY))
 
             // Nastavíme čtvercovou velikost dílku
             val layoutParams = LinearLayout.LayoutParams(pieceSize, pieceSize)
@@ -87,6 +97,7 @@ class SkullActivity : AppCompatActivity() {
                             val location = IntArray(2)
                             gameBoard.getLocationOnScreen(location)
 
+                            // Zkontrolujeme, zda je puclík umístěn v hracím poli
                             if (x >= location[0] && x <= (location[0] + gameBoard.width) &&
                                 y >= location[1] && y <= (location[1] + gameBoard.height)) {
 
@@ -105,6 +116,16 @@ class SkullActivity : AppCompatActivity() {
                                 gamePiece.y = snappedY.toFloat()
 
                                 gameBoard.addView(gamePiece)
+                            } else {
+                                // Najdeme původní pozici puclíku
+                                val puzzlePieceData = puzzlePiecesList.find { it.imageView == selectedPiece }
+                                puzzlePieceData?.let {
+                                    selectedPiece!!.animate()
+                                        .x(it.originalX)
+                                        .y(it.originalY)
+                                        .setDuration(200)
+                                        .start()
+                                }
                             }
                             selectedPiece = null
                         }
