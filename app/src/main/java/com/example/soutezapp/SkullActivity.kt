@@ -17,7 +17,9 @@ import androidx.appcompat.app.AppCompatActivity
 data class PuzzlePiece(
     val imageView: ImageView,
     val originalX: Float,
-    val originalY: Float
+    val originalY: Float,
+    val correctX: Float, // Správná X pozice
+    val correctY: Float  // Správná Y pozice
 )
 
 class SkullActivity : AppCompatActivity() {
@@ -58,10 +60,14 @@ class SkullActivity : AppCompatActivity() {
             imageView.setImageBitmap(piece)
 
             // Uložení původní pozice
-            val originalX = index * (pieceSize + 21)
-            val originalY = 1f // nebo nastavte na nějakou vhodnou hodnotu
+            val originalX = index * (pieceSize + 20.5)
+            val originalY = 10f // nebo nastavte na nějakou vhodnou hodnotu
 
-            puzzlePiecesList.add(PuzzlePiece(imageView, originalX.toFloat(), originalY))
+            // Správná pozice puclíku
+            val correctX = (index % gridSize) * pieceSize.toFloat()
+            val correctY = (index / gridSize) * pieceSize.toFloat()
+
+            puzzlePiecesList.add(PuzzlePiece(imageView, originalX.toFloat(), originalY, correctX, correctY))
 
             // Nastavíme čtvercovou velikost dílku
             val layoutParams = LinearLayout.LayoutParams(pieceSize, pieceSize)
@@ -75,7 +81,6 @@ class SkullActivity : AppCompatActivity() {
 
             imageView.setOnTouchListener { v, event ->
                 when (event.action) {
-                    //region ACTION_DOWN
                     MotionEvent.ACTION_DOWN -> {
                         (puzzlePiecesContainer.parent as HorizontalScrollView).requestDisallowInterceptTouchEvent(true)
                         dX = v.x - event.rawX
@@ -83,8 +88,6 @@ class SkullActivity : AppCompatActivity() {
                         selectedPiece = v as ImageView
                         true
                     }
-                    //endregion
-                    //region ACTION_MOVE
                     MotionEvent.ACTION_MOVE -> {
                         if (selectedPiece != null) {
                             val newX = event.rawX + dX
@@ -94,8 +97,6 @@ class SkullActivity : AppCompatActivity() {
                         }
                         true
                     }
-                    //endregion
-                    //region ACTION_UP
                     MotionEvent.ACTION_UP -> {
                         if (selectedPiece != null) {
                             val x = event.rawX
@@ -106,29 +107,45 @@ class SkullActivity : AppCompatActivity() {
 
                             // Zkontrolujeme, zda je puclík umístěn v hracím poli
                             if (x >= location[0] && x <= (location[0] + gameBoard.width) && y >= location[1] && y <= (location[1] + gameBoard.height)) {
-
                                 val column = ((x - location[0]) / pieceSize).toInt()
                                 val row = ((y - location[1]) / pieceSize).toInt()
 
+                                // Správné snapování pozic
                                 val snappedX = location[1] + column * pieceSize
                                 val snappedY = location[1] + row * pieceSize
 
-                                val gamePiece = ImageView(this)
-                                gamePiece.setImageBitmap((selectedPiece!!.drawable as BitmapDrawable).bitmap)
-                                gamePiece.layoutParams = FrameLayout.LayoutParams(pieceSize, pieceSize)
-                                gamePiece.elevation = 10f
+                                // Najděte datový objekt puclíku
+                                val puzzlePieceData = puzzlePiecesList.find { it.imageView == selectedPiece }
 
-                                gamePiece.x = snappedX.toFloat()
-                                gamePiece.y = snappedY.toFloat()
+                                // Zkontrolujte, zda je puclík umístěn na správné pozici
+                                if (puzzlePieceData != null && snappedX.toInt() == puzzlePieceData.correctX.toInt() && snappedY.toInt() == puzzlePieceData.correctY.toInt()) {
+                                    // Přidání puclíku na hrací pole
+                                    val gamePiece = ImageView(this)
+                                    gamePiece.setImageBitmap((selectedPiece!!.drawable as BitmapDrawable).bitmap)
+                                    gamePiece.layoutParams = FrameLayout.LayoutParams(pieceSize, pieceSize)
+                                    gamePiece.elevation = 10f
 
-                                gameBoard.addView(gamePiece)
+                                    gamePiece.x = snappedX.toFloat()
+                                    gamePiece.y = snappedY.toFloat()
+
+                                    gameBoard.addView(gamePiece)
+                                } else {
+                                    // Pokud není umístěn správně, vraťte puclík zpět na jeho původní pozici
+                                    puzzlePieceData?.let {
+                                        selectedPiece!!.animate()
+                                            .x(it.originalX)
+                                            .y(it.originalY)
+                                            .setDuration(200)
+                                            .start()
+                                    }
+                                }
                             } else {
-                                // Najdeme původní pozici puclíku
+                                // Pokud puclík není uvnitř hracího pole, vraťte ho na původní pozici
                                 val puzzlePieceData = puzzlePiecesList.find { it.imageView == selectedPiece }
                                 puzzlePieceData?.let {
                                     selectedPiece!!.animate()
                                         .x(it.originalX)
-                                        .y(it.originalY + 10)
+                                        .y(it.originalY)
                                         .setDuration(200)
                                         .start()
                                 }
@@ -137,7 +154,6 @@ class SkullActivity : AppCompatActivity() {
                         }
                         true
                     }
-                    //endregion
                     else -> false
                 }
             }
@@ -145,6 +161,7 @@ class SkullActivity : AppCompatActivity() {
         }
     }
     //endregion
+
     //region splitImage
 
     // Funkce pro rozdělení obrázku na řádky a sloupce
@@ -165,8 +182,9 @@ class SkullActivity : AppCompatActivity() {
                 pieces.add(piece)
             }
         }
-        pieces.shuffle()
+        //pieces.shuffle()
         return pieces
     }
     //endregion
 }
+
