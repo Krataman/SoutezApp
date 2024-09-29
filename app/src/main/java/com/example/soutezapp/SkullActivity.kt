@@ -5,6 +5,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
+import android.util.DisplayMetrics
+import android.util.Log
 
 import android.view.MotionEvent
 import android.widget.FrameLayout
@@ -18,8 +20,8 @@ data class PuzzlePiece(
     val imageView: ImageView,
     val originalX: Float,
     val originalY: Float,
-    val correctX: Float, // Správná X pozice
-    val correctY: Float  // Správná Y pozice
+    val correctX: Float,
+    val correctY: Float
 )
 
 class SkullActivity : AppCompatActivity() {
@@ -30,7 +32,7 @@ class SkullActivity : AppCompatActivity() {
     private var dY = 0f
 
     val gridSize = 6 // Počet řádků a sloupců
-    val pieceSize = 150 // Velikost jednoho puclíku
+    var pieceSize = 0 // Velikost jednoho puclíku
     private val puzzlePiecesList = mutableListOf<PuzzlePiece>() // Seznam puclíků
 
     //region onCreate
@@ -39,6 +41,8 @@ class SkullActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_skull)
+
+        calculateScreenWidth()
 
         // Načti obrázek z drawable
         val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.skull)
@@ -71,7 +75,7 @@ class SkullActivity : AppCompatActivity() {
 
             // Nastavíme čtvercovou velikost dílku
             val layoutParams = LinearLayout.LayoutParams(pieceSize, pieceSize)
-            layoutParams.setMargins(10, 10, 10, 10)
+            layoutParams.setMargins(10, 10, 10, 20)
             imageView.layoutParams = layoutParams
 
             // Ujistíme se, že obraz se správně vejde do čtvercového view
@@ -161,7 +165,6 @@ class SkullActivity : AppCompatActivity() {
         }
     }
     //endregion
-
     //region splitImage
 
     // Funkce pro rozdělení obrázku na řádky a sloupce
@@ -184,6 +187,17 @@ class SkullActivity : AppCompatActivity() {
         }
         //pieces.shuffle()
         return pieces
+    }
+    //endregion
+    //region screenWidth
+    private fun calculateScreenWidth() {
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+
+        // Get the width of the screen
+        var screenWidth = displayMetrics.widthPixels
+        pieceSize = screenWidth / 6
+
     }
     //endregion
 }
