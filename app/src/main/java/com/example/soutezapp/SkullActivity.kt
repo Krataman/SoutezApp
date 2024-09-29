@@ -27,7 +27,7 @@ class SkullActivity : AppCompatActivity() {
     private var dX = 0f
     private var dY = 0f
 
-    val gridSize = 5 // Počet řádků a sloupců
+    val gridSize = 6 // Počet řádků a sloupců
     val pieceSize = 150 // Velikost jednoho puclíku
     private val puzzlePiecesList = mutableListOf<PuzzlePiece>() // Seznam puclíků
 
@@ -146,6 +146,7 @@ class SkullActivity : AppCompatActivity() {
     }
     //endregion
     //region splitImage
+
     // Funkce pro rozdělení obrázku na řádky a sloupce
     private fun splitImage(image: Bitmap, rows: Int, cols: Int): List<Bitmap> {
         val pieceWidth = image.width / cols
@@ -164,6 +165,7 @@ class SkullActivity : AppCompatActivity() {
                 pieces.add(piece)
             }
         }
+        pieces.shuffle()
         return pieces
     }
     //endregion
