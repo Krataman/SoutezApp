@@ -7,7 +7,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
-
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
@@ -49,7 +48,8 @@ class SkullActivity : AppCompatActivity() {
 
         // Rozděl obrázek na puclíky
         val puzzlePieces = splitImage(originalBitmap, gridSize, gridSize)
-        val puzzlePiecesContainer = findViewById<LinearLayout>(R.id.puzzlePiecesContainer)
+        val puzzlePiecesContainer1 = findViewById<LinearLayout>(R.id.puzzlePiecesContainer1)
+        val puzzlePiecesContainer2 = findViewById<LinearLayout>(R.id.puzzlePiecesContainer2)
 
         gameBoard = findViewById(R.id.gameBoard)
 
@@ -83,10 +83,11 @@ class SkullActivity : AppCompatActivity() {
             imageView.adjustViewBounds = true
             imageView.elevation = 4f
 
+            // Logika tahání puclíků
             imageView.setOnTouchListener { v, event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        (puzzlePiecesContainer.parent as HorizontalScrollView).requestDisallowInterceptTouchEvent(true)
+                        (puzzlePiecesContainer1.parent as HorizontalScrollView).requestDisallowInterceptTouchEvent(true)
                         dX = v.x - event.rawX
                         dY = v.y - event.rawY
                         selectedPiece = v as ImageView
@@ -102,69 +103,23 @@ class SkullActivity : AppCompatActivity() {
                         true
                     }
                     MotionEvent.ACTION_UP -> {
-                        if (selectedPiece != null) {
-                            val x = event.rawX
-                            val y = event.rawY
-
-                            val location = IntArray(2)
-                            gameBoard.getLocationOnScreen(location)
-
-                            // Zkontrolujeme, zda je puclík umístěn v hracím poli
-                            if (x >= location[0] && x <= (location[0] + gameBoard.width) && y >= location[1] && y <= (location[1] + gameBoard.height)) {
-                                val column = ((x - location[0]) / pieceSize).toInt()
-                                val row = ((y - location[1]) / pieceSize).toInt()
-
-                                // Správné snapování pozic
-                                val snappedX = location[1] + column * pieceSize
-                                val snappedY = location[1] + row * pieceSize
-
-                                // Najděte datový objekt puclíku
-                                val puzzlePieceData = puzzlePiecesList.find { it.imageView == selectedPiece }
-
-                                // Zkontrolujte, zda je puclík umístěn na správné pozici
-                                if (puzzlePieceData != null && snappedX.toInt() == puzzlePieceData.correctX.toInt() && snappedY.toInt() == puzzlePieceData.correctY.toInt()) {
-                                    // Přidání puclíku na hrací pole
-                                    val gamePiece = ImageView(this)
-                                    gamePiece.setImageBitmap((selectedPiece!!.drawable as BitmapDrawable).bitmap)
-                                    gamePiece.layoutParams = FrameLayout.LayoutParams(pieceSize, pieceSize)
-                                    gamePiece.elevation = 10f
-
-                                    gamePiece.x = snappedX.toFloat()
-                                    gamePiece.y = snappedY.toFloat()
-
-                                    gameBoard.addView(gamePiece)
-                                } else {
-                                    // Pokud není umístěn správně, vraťte puclík zpět na jeho původní pozici
-                                    puzzlePieceData?.let {
-                                        selectedPiece!!.animate()
-                                            .x(it.originalX)
-                                            .y(it.originalY)
-                                            .setDuration(200)
-                                            .start()
-                                    }
-                                }
-                            } else {
-                                // Pokud puclík není uvnitř hracího pole, vraťte ho na původní pozici
-                                val puzzlePieceData = puzzlePiecesList.find { it.imageView == selectedPiece }
-                                puzzlePieceData?.let {
-                                    selectedPiece!!.animate()
-                                        .x(it.originalX)
-                                        .y(it.originalY)
-                                        .setDuration(200)
-                                        .start()
-                                }
-                            }
-                            selectedPiece = null
-                        }
+                        handlePieceDrop(event)
                         true
                     }
                     else -> false
                 }
             }
-            puzzlePiecesContainer.addView(imageView)
+
+            // Rozdělení dílků do dvou kontejnerů
+            if (index < puzzlePieces.size / 2) {
+                puzzlePiecesContainer1.addView(imageView)
+            } else {
+                puzzlePiecesContainer2.addView(imageView)
+            }
         }
     }
     //endregion
+
     //region splitImage
 
     // Funkce pro rozdělení obrázku na řádky a sloupce
@@ -185,20 +140,78 @@ class SkullActivity : AppCompatActivity() {
                 pieces.add(piece)
             }
         }
-        //pieces.shuffle()
+        //pieces.shuffle() // Uncomment to shuffle pieces
         return pieces
     }
     //endregion
+
+    //region handlePieceDrop
+    private fun handlePieceDrop(event: MotionEvent) {
+        if (selectedPiece != null) {
+            val x = event.rawX
+            val y = event.rawY
+
+            val location = IntArray(2)
+            gameBoard.getLocationOnScreen(location)
+
+            // Zkontrolujeme, zda je puclík umístěn v hracím poli
+            if (x >= location[0] && x <= (location[0] + gameBoard.width) && y >= location[1] && y <= (location[1] + gameBoard.height)) {
+                val column = ((x - location[0]) / pieceSize).toInt()
+                val row = ((y - location[1]) / pieceSize).toInt()
+
+                // Správné snapování pozic
+                val snappedX = location[0] + column * pieceSize
+                val snappedY = location[1] + row * pieceSize
+
+                // Najděte datový objekt puclíku
+                val puzzlePieceData = puzzlePiecesList.find { it.imageView == selectedPiece }
+
+                // Zkontrolujte, zda je puclík umístěn na správné pozici
+                if (puzzlePieceData != null && snappedX.toInt() == puzzlePieceData.correctX.toInt() && snappedY.toInt() == puzzlePieceData.correctY.toInt()) {
+                    // Přidání puclíku na hrací pole
+                    val gamePiece = ImageView(this)
+                    gamePiece.setImageBitmap((selectedPiece!!.drawable as BitmapDrawable).bitmap)
+                    gamePiece.layoutParams = FrameLayout.LayoutParams(pieceSize, pieceSize)
+                    gamePiece.elevation = 10f
+
+                    gamePiece.x = snappedX.toFloat()
+                    gamePiece.y = snappedY.toFloat()
+
+                    gameBoard.addView(gamePiece)
+                } else {
+                    // Pokud není umístěn správně, vraťte puclík zpět na jeho původní pozici
+                    puzzlePieceData?.let {
+                        selectedPiece!!.animate()
+                            .x(it.originalX)
+                            .y(it.originalY)
+                            .setDuration(200)
+                            .start()
+                    }
+                }
+            } else {
+                // Pokud puclík není uvnitř hracího pole, vraťte ho na původní pozici
+                val puzzlePieceData = puzzlePiecesList.find { it.imageView == selectedPiece }
+                puzzlePieceData?.let {
+                    selectedPiece!!.animate()
+                        .x(it.originalX)
+                        .y(it.originalY)
+                        .setDuration(200)
+                        .start()
+                }
+            }
+            selectedPiece = null
+        }
+    }
+    //endregion
+
     //region screenWidth
     private fun calculateScreenWidth() {
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
 
         // Get the width of the screen
-        var screenWidth = displayMetrics.widthPixels
+        val screenWidth = displayMetrics.widthPixels
         pieceSize = screenWidth / 6
-
     }
     //endregion
 }
-
