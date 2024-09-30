@@ -51,9 +51,12 @@ class SkullActivity : AppCompatActivity() {
         val puzzlePiecesContainer1 = findViewById<LinearLayout>(R.id.puzzlePiecesContainer1)
         val puzzlePiecesContainer2 = findViewById<LinearLayout>(R.id.puzzlePiecesContainer2)
 
+        val scrollView1 = findViewById<HorizontalScrollView>(R.id.horizontalScrollView1)
+        val scrollView2 = findViewById<HorizontalScrollView>(R.id.horizontalScrollView2)
+
         gameBoard = findViewById(R.id.gameBoard)
 
-        // Dynamicky nastav velikost hracího pole podle počtu puclíků a jejich velikosti
+        // Nastavení rozměrů hracího pole
         val boardLayoutParams = gameBoard.layoutParams
         boardLayoutParams.width = gridSize * pieceSize
         boardLayoutParams.height = gridSize * pieceSize
@@ -63,58 +66,68 @@ class SkullActivity : AppCompatActivity() {
             val imageView = ImageView(this)
             imageView.setImageBitmap(piece)
 
-            // Uložení původní pozice
-            val originalX = index * (pieceSize + 20.5)
-            val originalY = 10f // nebo nastavte na nějakou vhodnou hodnotu
-
-            // Správná pozice puclíku
+            // Původní a správná pozice puclíku
             val correctX = (index % gridSize) * pieceSize.toFloat()
             val correctY = (index / gridSize) * pieceSize.toFloat()
 
-            puzzlePiecesList.add(PuzzlePiece(imageView, originalX.toFloat(), originalY, correctX, correctY))
+            val originalX: Float
+            val originalY: Float
 
-            // Nastavíme čtvercovou velikost dílku
+            // Rozdělení dílků mezi kontejnery
+            if (index < puzzlePieces.size / 2) {
+                originalX = index * (pieceSize + 20.5f)
+                originalY = 10f
+                puzzlePiecesContainer1.addView(imageView)
+            } else {
+                originalX = (index - puzzlePieces.size / 2) * (pieceSize + 20.5f)
+                originalY = 10f
+                puzzlePiecesContainer2.addView(imageView)
+            }
+
+            // Přidání puclíku do seznamu s jeho pozicemi
+            puzzlePiecesList.add(PuzzlePiece(imageView, originalX, originalY, correctX, correctY))
+
+            // Nastavení velikosti a marginu
             val layoutParams = LinearLayout.LayoutParams(pieceSize, pieceSize)
             layoutParams.setMargins(10, 10, 10, 20)
             imageView.layoutParams = layoutParams
-
-            // Ujistíme se, že obraz se správně vejde do čtvercového view
             imageView.scaleType = ImageView.ScaleType.CENTER_CROP
             imageView.adjustViewBounds = true
             imageView.elevation = 4f
 
-            // Logika tahání puclíků
+            // Tahání puclíku
             imageView.setOnTouchListener { v, event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        (puzzlePiecesContainer1.parent as HorizontalScrollView).requestDisallowInterceptTouchEvent(true)
+                        // Zabránění scrollování
+                        scrollView1.requestDisallowInterceptTouchEvent(true)
+                        scrollView2.requestDisallowInterceptTouchEvent(true)
+
                         dX = v.x - event.rawX
                         dY = v.y - event.rawY
                         selectedPiece = v as ImageView
                         true
                     }
                     MotionEvent.ACTION_MOVE -> {
-                        if (selectedPiece != null) {
+                        // Pohyb puclíku
+                        selectedPiece?.let {
                             val newX = event.rawX + dX
                             val newY = event.rawY + dY
-                            selectedPiece!!.x = newX
-                            selectedPiece!!.y = newY
+                            it.x = newX
+                            it.y = newY
                         }
                         true
                     }
                     MotionEvent.ACTION_UP -> {
+                        // Snapping a kontrola puclíku
                         handlePieceDrop(event)
+                        // Povolit scrollování po dropnutí
+                        scrollView1.requestDisallowInterceptTouchEvent(false)
+                        scrollView2.requestDisallowInterceptTouchEvent(false)
                         true
                     }
                     else -> false
                 }
-            }
-
-            // Rozdělení dílků do dvou kontejnerů
-            if (index < puzzlePieces.size / 2) {
-                puzzlePiecesContainer1.addView(imageView)
-            } else {
-                puzzlePiecesContainer2.addView(imageView)
             }
         }
     }
@@ -140,7 +153,7 @@ class SkullActivity : AppCompatActivity() {
                 pieces.add(piece)
             }
         }
-        //pieces.shuffle() // Uncomment to shuffle pieces
+        pieces.shuffle() // Uncomment to shuffle pieces
         return pieces
     }
     //endregion
@@ -160,14 +173,14 @@ class SkullActivity : AppCompatActivity() {
                 val row = ((y - location[1]) / pieceSize).toInt()
 
                 // Správné snapování pozic
-                val snappedX = location[0] + column * pieceSize
-                val snappedY = location[1] + row * pieceSize
+                val snappedX = column * pieceSize
+                val snappedY = row * pieceSize
 
                 // Najděte datový objekt puclíku
                 val puzzlePieceData = puzzlePiecesList.find { it.imageView == selectedPiece }
 
                 // Zkontrolujte, zda je puclík umístěn na správné pozici
-                if (puzzlePieceData != null && snappedX.toInt() == puzzlePieceData.correctX.toInt() && snappedY.toInt() == puzzlePieceData.correctY.toInt()) {
+                if (puzzlePieceData != null && snappedX == puzzlePieceData.correctX.toInt() && snappedY == puzzlePieceData.correctY.toInt()) {
                     // Přidání puclíku na hrací pole
                     val gamePiece = ImageView(this)
                     gamePiece.setImageBitmap((selectedPiece!!.drawable as BitmapDrawable).bitmap)
