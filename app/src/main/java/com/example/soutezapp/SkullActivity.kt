@@ -62,18 +62,21 @@ class SkullActivity : AppCompatActivity() {
         boardLayoutParams.height = gridSize * pieceSize
         gameBoard.layoutParams = boardLayoutParams
 
-        for ((index, piece) in puzzlePieces.withIndex()) {
+        for ((index, pieceData) in puzzlePieces.withIndex()) {
             val imageView = ImageView(this)
-            imageView.setImageBitmap(piece)
+            val pieceBitmap = pieceData.first // The Bitmap
+            val correctPosition = pieceData.second // The correct position (Pair<Float, Float>)
 
-            // Původní a správná pozice puclíku
-            val correctX = (index % gridSize) * pieceSize.toFloat()
-            val correctY = (index / gridSize) * pieceSize.toFloat()
+            imageView.setImageBitmap(pieceBitmap)
+
+            // The correct X and Y positions from the shuffled list
+            val correctX = correctPosition.first
+            val correctY = correctPosition.second
 
             val originalX: Float
             val originalY: Float
 
-            // Rozdělení dílků mezi kontejnery
+            // Distribute pieces into containers
             if (index < puzzlePieces.size / 2) {
                 originalX = index * (pieceSize + 20.5f)
                 originalY = 10f
@@ -84,10 +87,10 @@ class SkullActivity : AppCompatActivity() {
                 puzzlePiecesContainer2.addView(imageView)
             }
 
-            // Přidání puclíku do seznamu s jeho pozicemi
+            // Add the piece data (with shuffled correct positions) to the list
             puzzlePiecesList.add(PuzzlePiece(imageView, originalX, originalY, correctX, correctY))
 
-            // Nastavení velikosti a marginu
+            // Set the layout parameters and touch listener
             val layoutParams = LinearLayout.LayoutParams(pieceSize, pieceSize)
             layoutParams.setMargins(10, 10, 10, 20)
             imageView.layoutParams = layoutParams
@@ -95,11 +98,9 @@ class SkullActivity : AppCompatActivity() {
             imageView.adjustViewBounds = true
             imageView.elevation = 4f
 
-            // Tahání puclíku
             imageView.setOnTouchListener { v, event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        // Zabránění scrollování
                         scrollView1.requestDisallowInterceptTouchEvent(true)
                         scrollView2.requestDisallowInterceptTouchEvent(true)
 
@@ -109,7 +110,6 @@ class SkullActivity : AppCompatActivity() {
                         true
                     }
                     MotionEvent.ACTION_MOVE -> {
-                        // Pohyb puclíku
                         selectedPiece?.let {
                             val newX = event.rawX + dX
                             val newY = event.rawY + dY
@@ -119,9 +119,7 @@ class SkullActivity : AppCompatActivity() {
                         true
                     }
                     MotionEvent.ACTION_UP -> {
-                        // Snapping a kontrola puclíku
                         handlePieceDrop(event)
-                        // Povolit scrollování po dropnutí
                         scrollView1.requestDisallowInterceptTouchEvent(false)
                         scrollView2.requestDisallowInterceptTouchEvent(false)
                         true
@@ -136,10 +134,10 @@ class SkullActivity : AppCompatActivity() {
     //region splitImage
 
     // Funkce pro rozdělení obrázku na řádky a sloupce
-    private fun splitImage(image: Bitmap, rows: Int, cols: Int): List<Bitmap> {
+    private fun splitImage(image: Bitmap, rows: Int, cols: Int): List<Pair<Bitmap, Pair<Float, Float>>> {
         val pieceWidth = image.width / cols
         val pieceHeight = image.height / rows
-        val pieces = mutableListOf<Bitmap>()
+        val pieces = mutableListOf<Pair<Bitmap, Pair<Float, Float>>>()
 
         for (row in 0 until rows) {
             for (col in 0 until cols) {
@@ -150,12 +148,14 @@ class SkullActivity : AppCompatActivity() {
                     pieceWidth,
                     pieceHeight
                 )
-                pieces.add(piece)
+                // Pair the piece with its correct (X, Y) position
+                pieces.add(Pair(piece, Pair(col * pieceSize.toFloat(), row * pieceSize.toFloat())))
             }
         }
-        pieces.shuffle() // Uncomment to shuffle pieces
+        pieces.shuffle() // Shuffle both the pieces and their positions
         return pieces
     }
+
     //endregion
 
     //region handlePieceDrop
