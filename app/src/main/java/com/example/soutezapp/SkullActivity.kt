@@ -30,7 +30,8 @@ class SkullActivity : AppCompatActivity() {
     private var dX = 0f
     private var dY = 0f
 
-    val gridSize = 6 // Počet řádků a sloupců
+    val rows = Data.rows // rady
+    val columms = Data.columms //
     var pieceSize = 0 // Velikost jednoho puclíku
     private val puzzlePiecesList = mutableListOf<PuzzlePiece>() // Seznam puclíků
 
@@ -47,7 +48,7 @@ class SkullActivity : AppCompatActivity() {
         val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.skull)
 
         // Rozděl obrázek na puclíky
-        val puzzlePieces = splitImage(originalBitmap, gridSize, gridSize)
+        val puzzlePieces = splitImage(originalBitmap, rows, columms)
         val puzzlePiecesContainer1 = findViewById<LinearLayout>(R.id.puzzlePiecesContainer1)
         val puzzlePiecesContainer2 = findViewById<LinearLayout>(R.id.puzzlePiecesContainer2)
 
@@ -58,8 +59,8 @@ class SkullActivity : AppCompatActivity() {
 
         // Nastavení rozměrů hracího pole
         val boardLayoutParams = gameBoard.layoutParams
-        boardLayoutParams.width = gridSize * pieceSize
-        boardLayoutParams.height = gridSize * pieceSize
+        boardLayoutParams.width = rows * pieceSize
+        boardLayoutParams.height = columms * pieceSize
         gameBoard.layoutParams = boardLayoutParams
 
         for ((index, pieceData) in puzzlePieces.withIndex()) {
