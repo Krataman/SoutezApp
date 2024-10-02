@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -6,53 +5,27 @@
 
     <FrameLayout
         android:id="@+id/gameBoard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.example.soutezapp.GridLinesView
             android:id="@+id/gridLinesView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </FrameLayout>
 
-    <!-- Lišta s puclíky -->
-<HorizontalScrollView
-android:id="@+id/horizontalScrollView1"
-android:layout_width="match_parent"
-android:layout_height="wrap_content"
-android:background="@color/black"
-android:clipToPadding="false"
-app:layout_constraintBottom_toBottomOf="parent"
-app:layout_constraintEnd_toEndOf="parent"
-app:layout_constraintStart_toStartOf="parent">
-
-<LinearLayout
-    android:id="@+id/puzzlePiecesContainer1"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="50dp"
-    android:orientation="horizontal" />
-</HorizontalScrollView>
-
-    <HorizontalScrollView
-        android:id="@+id/horizontalScrollView2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/black"
-        android:clipToPadding="false"
-        app:layout_constraintBottom_toTopOf="@+id/horizontalScrollView1"
-    app:layout_constraintStart_toStartOf="parent">
-
-    <LinearLayout
-        android:id="@+id/puzzlePiecesContainer2"
+    <GridLayout
+        android:id="@+id/puzzlePiecesContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="0dp"
-        android:orientation="horizontal" />
-</HorizontalScrollView>
+        android:columnCount="5"
+        android:rowCount="4"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

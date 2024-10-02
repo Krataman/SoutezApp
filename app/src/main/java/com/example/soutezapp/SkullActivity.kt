@@ -9,11 +9,13 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.MotionEvent
 import android.widget.FrameLayout
+import android.widget.GridLayout
 import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.marginTop
 
 data class PuzzlePiece(
     val imageView: ImageView,
@@ -32,7 +34,6 @@ class SkullActivity : AppCompatActivity() {
 
     val rows = Data.rows // rady
     val columms = Data.columms //
-    var pieceSize = 0 // Velikost jednoho puclíku
     private val puzzlePiecesList = mutableListOf<PuzzlePiece>() // Seznam puclíků
 
     //region onCreate
@@ -42,91 +43,64 @@ class SkullActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_skull)
 
-        calculateScreenWidth()
-
-        // Načti obrázek z drawable
-        val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.skull)
-
-        // Rozděl obrázek na puclíky
+        val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.kelt)
         val puzzlePieces = splitImage(originalBitmap, rows, columms)
-        val puzzlePiecesContainer1 = findViewById<LinearLayout>(R.id.puzzlePiecesContainer1)
-        val puzzlePiecesContainer2 = findViewById<LinearLayout>(R.id.puzzlePiecesContainer2)
-
-        val scrollView1 = findViewById<HorizontalScrollView>(R.id.horizontalScrollView1)
-        val scrollView2 = findViewById<HorizontalScrollView>(R.id.horizontalScrollView2)
 
         gameBoard = findViewById(R.id.gameBoard)
+        val puzzlePiecesContainer = findViewById<GridLayout>(R.id.puzzlePiecesContainer)
 
-        // Nastavení rozměrů hracího pole
+        // Update GridLayout row and column counts based on the number of pieces
+        puzzlePiecesContainer.rowCount = rows // Set the correct row count
+        puzzlePiecesContainer.columnCount = columms // Set the correct column count
+
+        // Adjust game board size
         val boardLayoutParams = gameBoard.layoutParams
-        boardLayoutParams.width = rows * pieceSize
-        boardLayoutParams.height = columms * pieceSize
+        boardLayoutParams.width = (Data.widthPX * columms)
+        boardLayoutParams.height = (Data.heightPX * rows)
         gameBoard.layoutParams = boardLayoutParams
 
+        // Add puzzle pieces to GridLayout
         for ((index, pieceData) in puzzlePieces.withIndex()) {
             val imageView = ImageView(this)
-            val pieceBitmap = pieceData.first // The Bitmap
-            val correctPosition = pieceData.second // The correct position (Pair<Float, Float>)
+            val pieceBitmap = pieceData.first
+            val correctPosition = pieceData.second
 
             imageView.setImageBitmap(pieceBitmap)
 
-            // The correct X and Y positions from the shuffled list
-            val correctX = correctPosition.first
-            val correctY = correctPosition.second
+            val originalX: Float = index * (0 + 20.5f)
+            val originalY: Float = 0f
 
-            val originalX: Float
-            val originalY: Float
+            // Set layout parameters for GridLayout
+            val layoutParams = GridLayout.LayoutParams().apply {
+                width = Data.widthPX
+                height = Data.heightPX
 
-            // Distribute pieces into containers
-            if (index < puzzlePieces.size / 2) {
-                originalX = index * (pieceSize + 20.5f)
-                originalY = 10f
-                puzzlePiecesContainer1.addView(imageView)
-            } else {
-                originalX = (index - puzzlePieces.size / 2) * (pieceSize + 20.5f)
-                originalY = 10f
-                puzzlePiecesContainer2.addView(imageView)
+                // Ensure we do not exceed the defined row count
+                val rowIndex = index / columms
+                if (rowIndex >= rows) {
+                    throw IllegalArgumentException("Row index $rowIndex exceeds the row count $rows.")
+                }
+                rowSpec = GridLayout.spec(rowIndex) // Calculate row based on index
+
+                // Ensure we do not exceed the defined column count
+                val columnIndex = index % columms
+                if (columnIndex >= columms) {
+                    throw IllegalArgumentException("Column index $columnIndex exceeds the column count $columms.")
+                }
+                columnSpec = GridLayout.spec(columnIndex) // Calculate column based on index
             }
 
-            // Add the piece data (with shuffled correct positions) to the list
-            puzzlePiecesList.add(PuzzlePiece(imageView, originalX, originalY, correctX, correctY))
-
-            // Set the layout parameters and touch listener
-            val layoutParams = LinearLayout.LayoutParams(pieceSize, pieceSize)
-            layoutParams.setMargins(10, 10, 10, 20)
             imageView.layoutParams = layoutParams
+            puzzlePiecesContainer.addView(imageView)
+
+            puzzlePiecesList.add(PuzzlePiece(imageView, originalX, originalY, correctPosition.first, correctPosition.second))
+
             imageView.scaleType = ImageView.ScaleType.CENTER_CROP
             imageView.adjustViewBounds = true
             imageView.elevation = 4f
 
             imageView.setOnTouchListener { v, event ->
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        scrollView1.requestDisallowInterceptTouchEvent(true)
-                        scrollView2.requestDisallowInterceptTouchEvent(true)
-
-                        dX = v.x - event.rawX
-                        dY = v.y - event.rawY
-                        selectedPiece = v as ImageView
-                        true
-                    }
-                    MotionEvent.ACTION_MOVE -> {
-                        selectedPiece?.let {
-                            val newX = event.rawX + dX
-                            val newY = event.rawY + dY
-                            it.x = newX
-                            it.y = newY
-                        }
-                        true
-                    }
-                    MotionEvent.ACTION_UP -> {
-                        handlePieceDrop(event)
-                        scrollView1.requestDisallowInterceptTouchEvent(false)
-                        scrollView2.requestDisallowInterceptTouchEvent(false)
-                        true
-                    }
-                    else -> false
-                }
+                handleTouch(event, v as ImageView) // Use a method to handle touch
             }
         }
     }
@@ -150,7 +124,7 @@ class SkullActivity : AppCompatActivity() {
                     pieceHeight
                 )
                 // Pair the piece with its correct (X, Y) position
-                pieces.add(Pair(piece, Pair(col * pieceSize.toFloat(), row * pieceSize.toFloat())))
+                pieces.add(Pair(piece, Pair(col * Data.widthPX.toFloat(), row * Data.heightPX.toFloat())))
             }
         }
         pieces.shuffle() // Shuffle both the pieces and their positions
@@ -170,12 +144,12 @@ class SkullActivity : AppCompatActivity() {
 
             // Zkontrolujeme, zda je puclík umístěn v hracím poli
             if (x >= location[0] && x <= (location[0] + gameBoard.width) && y >= location[1] && y <= (location[1] + gameBoard.height)) {
-                val column = ((x - location[0]) / pieceSize).toInt()
-                val row = ((y - location[1]) / pieceSize).toInt()
+                val column = ((x - location[0]) / Data.widthPX).toInt()
+                val row = ((y - location[1]) / Data.heightPX).toInt()
 
                 // Správné snapování pozic
-                val snappedX = column * pieceSize
-                val snappedY = row * pieceSize
+                val snappedX = column * Data.widthPX
+                val snappedY = row * Data.heightPX
 
                 // Najděte datový objekt puclíku
                 val puzzlePieceData = puzzlePiecesList.find { it.imageView == selectedPiece }
@@ -185,7 +159,7 @@ class SkullActivity : AppCompatActivity() {
                     // Přidání puclíku na hrací pole
                     val gamePiece = ImageView(this)
                     gamePiece.setImageBitmap((selectedPiece!!.drawable as BitmapDrawable).bitmap)
-                    gamePiece.layoutParams = FrameLayout.LayoutParams(pieceSize, pieceSize)
+                    gamePiece.layoutParams = FrameLayout.LayoutParams(Data.widthPX, Data.heightPX)
                     gamePiece.elevation = 10f
 
                     gamePiece.x = snappedX.toFloat()
@@ -218,14 +192,30 @@ class SkullActivity : AppCompatActivity() {
     }
     //endregion
 
-    //region screenWidth
-    private fun calculateScreenWidth() {
-        val displayMetrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-
-        // Get the width of the screen
-        val screenWidth = displayMetrics.widthPixels
-        pieceSize = screenWidth / 6
+    private fun handleTouch(event: MotionEvent, imageView: ImageView): Boolean {
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                dX = imageView.x - event.rawX
+                dY = imageView.y - event.rawY
+                selectedPiece = imageView
+                return true
+            }
+            MotionEvent.ACTION_MOVE -> {
+                selectedPiece?.let {
+                    val newX = event.rawX + dX
+                    val newY = event.rawY + dY
+                    it.x = newX
+                    it.y = newY
+                }
+                return true
+            }
+            MotionEvent.ACTION_UP -> {
+                handlePieceDrop(event)
+                return true
+            }
+            else -> return false
+        }
     }
-    //endregion
+
+
 }

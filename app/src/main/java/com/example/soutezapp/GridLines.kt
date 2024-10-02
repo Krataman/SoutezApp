@@ -11,7 +11,7 @@ class GridLinesView(context: Context, attrs: AttributeSet?) : View(context, attr
     private val paint = Paint()
 
     init {
-        paint.color = Color.BLACK // Barva mřížky
+        paint.color = Color.WHITE // Barva mřížky
         paint.strokeWidth = 5f // Tloušťka čar
     }
 
@@ -21,8 +21,9 @@ class GridLinesView(context: Context, attrs: AttributeSet?) : View(context, attr
         val numColumns = Data.columms
         val numRows = Data.rows
 
-        val cellWidth = width / numColumns
-        val cellHeight = height / numRows
+        // Rozměry jednotlivých buněk
+        val cellWidth = Data.widthPX
+        val cellHeight = Data.heightPX
 
         // Vykreslení svislých čar
         for (i in 1 until numColumns) {
