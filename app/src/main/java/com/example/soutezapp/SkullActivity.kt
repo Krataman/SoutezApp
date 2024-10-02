@@ -1,6 +1,7 @@
 package com.example.soutezapp
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
@@ -8,6 +9,8 @@ import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
+import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.GridLayout
 import android.widget.HorizontalScrollView
@@ -40,8 +43,13 @@ class SkullActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //screenHeight(this)
         enableEdgeToEdge()
+
         setContentView(R.layout.activity_skull)
+
+
+        hideSystemUI()
 
         val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.kelt)
         val puzzlePieces = splitImage(originalBitmap, rows, columms)
@@ -67,7 +75,7 @@ class SkullActivity : AppCompatActivity() {
 
             imageView.setImageBitmap(pieceBitmap)
 
-            val originalX: Float = index * (0 + 20.5f)
+            val originalX: Float = index * (0f)
             val originalY: Float = 0f
 
             // Set layout parameters for GridLayout
@@ -110,8 +118,8 @@ class SkullActivity : AppCompatActivity() {
 
     // Funkce pro rozdělení obrázku na řádky a sloupce
     private fun splitImage(image: Bitmap, rows: Int, cols: Int): List<Pair<Bitmap, Pair<Float, Float>>> {
-        val pieceWidth = image.width / cols
-        val pieceHeight = image.height / rows
+        val pieceWidth = image.width / Data.rows
+        val pieceHeight = image.height / Data.columms
         val pieces = mutableListOf<Pair<Bitmap, Pair<Float, Float>>>()
 
         for (row in 0 until rows) {
@@ -144,7 +152,7 @@ class SkullActivity : AppCompatActivity() {
 
             // Zkontrolujeme, zda je puclík umístěn v hracím poli
             if (x >= location[0] && x <= (location[0] + gameBoard.width) && y >= location[1] && y <= (location[1] + gameBoard.height)) {
-                val column = ((x - location[0]) / Data.widthPX).toInt()
+                val column = ((x - location[1]) / Data.widthPX).toInt()
                 val row = ((y - location[1]) / Data.heightPX).toInt()
 
                 // Správné snapování pozic
@@ -214,6 +222,38 @@ class SkullActivity : AppCompatActivity() {
                 return true
             }
             else -> return false
+        }
+    }
+
+    private fun screenHeight(context: Context) {
+        val displayMetrics = DisplayMetrics()
+        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+
+        var displayHeight =  displayMetrics.heightPixels // Vrátí výšku displeje v pixelech
+
+        Data.heightPX = displayHeight / 5
+
+    }
+
+    private fun hideSystemUI() {
+        val decorView = window.decorView
+        decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+    }
+
+    private fun snapAllPiecesToCorrectPositions() {
+        for (piece in puzzlePiecesList) {
+            val snappedX = piece.correctX.toFloat()
+            val snappedY = piece.correctY.toFloat()
+
+            // Umístění kousku na hrací plochu
+            piece.imageView.animate()
+                .x(snappedX)
+                .y(snappedY)
+                .setDuration(200)
+                .start()
         }
     }
 

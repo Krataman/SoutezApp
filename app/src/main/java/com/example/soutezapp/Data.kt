@@ -3,10 +3,10 @@ package com.example.soutezapp
 class Data {
     companion object {
         val rows: Int = 5 // sloupce??
-        val columms: Int = 4 //radky??
+        val columms: Int = 5 //radky??
 
-        val widthPX: Int = 175
-        val heightPX: Int = 190
+        var widthPX: Int = 140
+        var heightPX: Int = 190
 
 
     }
