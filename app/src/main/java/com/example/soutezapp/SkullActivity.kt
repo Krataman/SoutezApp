@@ -25,6 +25,12 @@ data class PuzzlePiece(
     val correctY: Float
 )
 
+data class PuzzlePieceData(
+    val imageView: ImageView,
+    var snappedX: Float,
+    var snappedY: Float
+)
+
 class SkullActivity : AppCompatActivity() {
 
     private var selectedPiece: ImageView? = null
@@ -138,6 +144,9 @@ class SkullActivity : AppCompatActivity() {
     //endregion
 
     //region handlePieceDrop
+    // List to keep track of snapped positions
+    private val snappedPiecesList = mutableListOf<PuzzlePieceData>()
+
     private fun handlePieceDrop(event: MotionEvent) {
         if (selectedPiece != null) {
             val x = event.rawX
@@ -159,29 +168,51 @@ class SkullActivity : AppCompatActivity() {
                     .setDuration(200)
                     .start()
 
-                // Přidání puclíku na hrací plochu
-                if (selectedPiece!!.parent != gameBoard) {
-                    // Odstraníme puclík z původní polohy, pokud není již v herním poli
-                    val parentView = selectedPiece!!.parent as? ViewGroup
-                    parentView?.removeView(selectedPiece)
-
+                // Pokud je puclík již na herní desce, aktualizujte jeho pozici v snappedPiecesList
+                val snappedPieceData = snappedPiecesList.find { it.imageView == selectedPiece }
+                if (snappedPieceData != null) {
+                    // Aktualizace pozice
+                    snappedPieceData.snappedX = snappedX.toFloat()
+                    snappedPieceData.snappedY = snappedY.toFloat()
+                } else {
                     // Přidání puclíku na hrací plochu
-                    val layoutParams = FrameLayout.LayoutParams(Data.widthPX, Data.heightPX)
-                    selectedPiece!!.layoutParams = layoutParams
-                    selectedPiece!!.elevation = 10f
-                    gameBoard.addView(selectedPiece)
+                    if (selectedPiece!!.parent != gameBoard) {
+                        // Odstraníme puclík z původní polohy, pokud není již v herním poli
+                        val parentView = selectedPiece!!.parent as? ViewGroup
+                        parentView?.removeView(selectedPiece)
+
+                        // Přidání puclíku na hrací plochu
+                        val layoutParams = FrameLayout.LayoutParams(Data.widthPX, Data.heightPX)
+                        selectedPiece!!.layoutParams = layoutParams
+                        selectedPiece!!.elevation = 10f
+                        gameBoard.addView(selectedPiece)
+
+                        // Uložíme snapnutou pozici kousku
+                        snappedPiecesList.add(PuzzlePieceData(selectedPiece!!, snappedX.toFloat(), snappedY.toFloat()))
+                    }
                 }
 
                 selectedPiece = null // Nastavit selectedPiece na null, aby se zamezilo dalšímu zpracování
             } else {
-                // Pokud puclík není uvnitř hracího pole, vraťte ho na původní pozici
-                val puzzlePieceData = puzzlePiecesList.find { it.imageView == selectedPiece }
-                puzzlePieceData?.let {
+                // Pokud puclík není uvnitř hracího pole, vraťte ho na snapnutou pozici
+                val snappedPieceData = snappedPiecesList.find { it.imageView == selectedPiece }
+                if (snappedPieceData != null) {
+                    // Vrať puclík na snapnutou pozici
                     selectedPiece!!.animate()
-                        .x(it.originalX)
-                        .y(it.originalY)
+                        .x(snappedPieceData.snappedX)
+                        .y(snappedPieceData.snappedY)
                         .setDuration(200)
                         .start()
+                } else {
+                    // Pokud není snapnutý, vrať ho na původní pozici
+                    val puzzlePieceData = puzzlePiecesList.find { it.imageView == selectedPiece }
+                    puzzlePieceData?.let {
+                        selectedPiece!!.animate()
+                            .x(it.originalX)
+                            .y(it.originalY)
+                            .setDuration(200)
+                            .start()
+                    }
                 }
             }
         }
