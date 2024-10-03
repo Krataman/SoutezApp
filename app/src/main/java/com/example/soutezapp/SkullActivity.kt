@@ -7,18 +7,14 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.GridLayout
-import android.widget.HorizontalScrollView
 import android.widget.ImageView
-import android.widget.LinearLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.marginTop
 
 data class PuzzlePiece(
     val imageView: ImageView,
@@ -32,6 +28,7 @@ class SkullActivity : AppCompatActivity() {
 
     private var selectedPiece: ImageView? = null
     private lateinit var gameBoard: FrameLayout
+    private lateinit var puzzlePiecesContainer: GridLayout
     private var dX = 0f
     private var dY = 0f
 
@@ -45,17 +42,15 @@ class SkullActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         //screenHeight(this)
         enableEdgeToEdge()
-
         setContentView(R.layout.activity_skull)
-
-
+        screenSett(this)
         hideSystemUI()
 
         val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.kelt)
         val puzzlePieces = splitImage(originalBitmap, rows, columms)
 
         gameBoard = findViewById(R.id.gameBoard)
-        val puzzlePiecesContainer = findViewById<GridLayout>(R.id.puzzlePiecesContainer)
+        puzzlePiecesContainer = findViewById<GridLayout>(R.id.puzzlePiecesContainer)
 
         // Update GridLayout row and column counts based on the number of pieces
         puzzlePiecesContainer.rowCount = rows // Set the correct row count
@@ -152,30 +147,46 @@ class SkullActivity : AppCompatActivity() {
 
             // Zkontrolujeme, zda je puclík umístěn v hracím poli
             if (x >= location[0] && x <= (location[0] + gameBoard.width) && y >= location[1] && y <= (location[1] + gameBoard.height)) {
-                val column = ((x - location[1]) / Data.widthPX).toInt()
-                val row = ((y - location[1]) / Data.heightPX).toInt()
-
                 // Správné snapování pozic
-                val snappedX = column * Data.widthPX
-                val snappedY = row * Data.heightPX
+                val snappedX = ((x - location[0]) / Data.widthPX).toInt() * Data.widthPX
+                val snappedY = ((y - location[1]) / Data.heightPX).toInt() * Data.heightPX
 
-                // Najděte datový objekt puclíku
-                val puzzlePieceData = puzzlePiecesList.find { it.imageView == selectedPiece }
+                // Zkontrolujte, zda již kousek nebyl umístěn na hrací plochu
+                var alreadyPlacedPiece = false
+                for (i in 0 until gameBoard.childCount) {
+                    val child = gameBoard.getChildAt(i)
+                    if (child is ImageView && child.drawable.constantState == selectedPiece!!.drawable.constantState) {
+                        alreadyPlacedPiece = true
+                        break
+                    }
+                }
 
-                // Zkontrolujte, zda je puclík umístěn na správné pozici
-                if (puzzlePieceData != null && snappedX == puzzlePieceData.correctX.toInt() && snappedY == puzzlePieceData.correctY.toInt()) {
-                    // Přidání puclíku na hrací pole
+                if (!alreadyPlacedPiece) {
+                    // Přesune puclík na pozici, kde byl uvolněn
+                    selectedPiece!!.animate()
+                        .x(snappedX.toFloat())
+                        .y(snappedY.toFloat())
+                        .setDuration(200)
+                        .start()
+
+                    // Přidání puclíku na hrací plochu
                     val gamePiece = ImageView(this)
                     gamePiece.setImageBitmap((selectedPiece!!.drawable as BitmapDrawable).bitmap)
                     gamePiece.layoutParams = FrameLayout.LayoutParams(Data.widthPX, Data.heightPX)
                     gamePiece.elevation = 10f
 
+                    // Umístění kousku na hrací plochu
                     gamePiece.x = snappedX.toFloat()
                     gamePiece.y = snappedY.toFloat()
 
                     gameBoard.addView(gamePiece)
+
+                    // Odstranění selectedPiece z nabídky
+                    puzzlePiecesContainer.removeView(selectedPiece)
+                    selectedPiece = null // Nastavit selectedPiece na null, aby se zamezilo dalšímu zpracování
                 } else {
-                    // Pokud není umístěn správně, vraťte puclík zpět na jeho původní pozici
+                    // Pokud je kousek již umístěn, vraťte ho na původní pozici
+                    val puzzlePieceData = puzzlePiecesList.find { it.imageView == selectedPiece }
                     puzzlePieceData?.let {
                         selectedPiece!!.animate()
                             .x(it.originalX)
@@ -195,7 +206,6 @@ class SkullActivity : AppCompatActivity() {
                         .start()
                 }
             }
-            selectedPiece = null
         }
     }
     //endregion
@@ -225,14 +235,18 @@ class SkullActivity : AppCompatActivity() {
         }
     }
 
-    private fun screenHeight(context: Context) {
+    private fun screenSett(context: Context) {
         val displayMetrics = DisplayMetrics()
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         windowManager.defaultDisplay.getMetrics(displayMetrics)
 
-        var displayHeight =  displayMetrics.heightPixels // Vrátí výšku displeje v pixelech
+        var displayHeight = displayMetrics.heightPixels // Výška displeje v pixelech
 
-        Data.heightPX = displayHeight / 5
+        val widthRatio = 0.74f // Poměr, jak velká má být šířka vůči výšce, například 1.5x výška
+
+// Nastav herní desku na nejbližší výšku dělitelné 5 a přepočítej šířku
+        Data.heightPX = nearestMultipleOfFive(displayHeight) / 5
+        Data.widthPX = (Data.heightPX * widthRatio).toInt()
 
     }
 
@@ -254,6 +268,24 @@ class SkullActivity : AppCompatActivity() {
                 .y(snappedY)
                 .setDuration(200)
                 .start()
+        }
+    }
+
+    private fun nearestMultipleOfFive(number: Int): Int {
+        val remainder = number % 5
+        return if (remainder != 0) {
+            // Pokud je číslo liché, přidejte nebo odečtěte potřebnou hodnotu, aby se dostalo na nejbližší číslo dělitelné 5
+            if (number % 2 != 0) {
+                if (remainder < 3) {
+                    number - remainder // Odebíráme zbytek, abychom se dostali na nižší číslo dělitelné 5
+                } else {
+                    number + (5 - remainder) // Přidáváme potřebnou hodnotu k dosažení vyššího čísla dělitelného 5
+                }
+            } else {
+                number // Pokud je číslo sudé, vraťte ho beze změny
+            }
+        } else {
+            number // Pokud je číslo již dělitelné 5, vraťte ho
         }
     }
 
