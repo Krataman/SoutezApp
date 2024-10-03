@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.GridLayout
@@ -151,50 +152,27 @@ class SkullActivity : AppCompatActivity() {
                 val snappedX = ((x - location[0]) / Data.widthPX).toInt() * Data.widthPX
                 val snappedY = ((y - location[1]) / Data.heightPX).toInt() * Data.heightPX
 
-                // Zkontrolujte, zda již kousek nebyl umístěn na hrací plochu
-                var alreadyPlacedPiece = false
-                for (i in 0 until gameBoard.childCount) {
-                    val child = gameBoard.getChildAt(i)
-                    if (child is ImageView && child.drawable.constantState == selectedPiece!!.drawable.constantState) {
-                        alreadyPlacedPiece = true
-                        break
-                    }
-                }
+                // Přesune puclík na pozici, kde byl uvolněn
+                selectedPiece!!.animate()
+                    .x(snappedX.toFloat())
+                    .y(snappedY.toFloat())
+                    .setDuration(200)
+                    .start()
 
-                if (!alreadyPlacedPiece) {
-                    // Přesune puclík na pozici, kde byl uvolněn
-                    selectedPiece!!.animate()
-                        .x(snappedX.toFloat())
-                        .y(snappedY.toFloat())
-                        .setDuration(200)
-                        .start()
+                // Přidání puclíku na hrací plochu
+                if (selectedPiece!!.parent != gameBoard) {
+                    // Odstraníme puclík z původní polohy, pokud není již v herním poli
+                    val parentView = selectedPiece!!.parent as? ViewGroup
+                    parentView?.removeView(selectedPiece)
 
                     // Přidání puclíku na hrací plochu
-                    val gamePiece = ImageView(this)
-                    gamePiece.setImageBitmap((selectedPiece!!.drawable as BitmapDrawable).bitmap)
-                    gamePiece.layoutParams = FrameLayout.LayoutParams(Data.widthPX, Data.heightPX)
-                    gamePiece.elevation = 10f
-
-                    // Umístění kousku na hrací plochu
-                    gamePiece.x = snappedX.toFloat()
-                    gamePiece.y = snappedY.toFloat()
-
-                    gameBoard.addView(gamePiece)
-
-                    // Odstranění selectedPiece z nabídky
-                    puzzlePiecesContainer.removeView(selectedPiece)
-                    selectedPiece = null // Nastavit selectedPiece na null, aby se zamezilo dalšímu zpracování
-                } else {
-                    // Pokud je kousek již umístěn, vraťte ho na původní pozici
-                    val puzzlePieceData = puzzlePiecesList.find { it.imageView == selectedPiece }
-                    puzzlePieceData?.let {
-                        selectedPiece!!.animate()
-                            .x(it.originalX)
-                            .y(it.originalY)
-                            .setDuration(200)
-                            .start()
-                    }
+                    val layoutParams = FrameLayout.LayoutParams(Data.widthPX, Data.heightPX)
+                    selectedPiece!!.layoutParams = layoutParams
+                    selectedPiece!!.elevation = 10f
+                    gameBoard.addView(selectedPiece)
                 }
+
+                selectedPiece = null // Nastavit selectedPiece na null, aby se zamezilo dalšímu zpracování
             } else {
                 // Pokud puclík není uvnitř hracího pole, vraťte ho na původní pozici
                 val puzzlePieceData = puzzlePiecesList.find { it.imageView == selectedPiece }
@@ -288,6 +266,5 @@ class SkullActivity : AppCompatActivity() {
             number // Pokud je číslo již dělitelné 5, vraťte ho
         }
     }
-
 
 }
