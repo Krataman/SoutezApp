@@ -13,12 +13,24 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+        initButtons()
 
-        val puzzleButton = findViewById<Button>(R.id.skullActivityButton)
-        puzzleButton.setOnClickListener {
+        }
+
+    private fun initButtons(){
+        val skullButton = findViewById<Button>(R.id.skullActivityButton)
+        skullButton.setOnClickListener {
             // Spustíme PuzzleActivity
             val intent = Intent(this, SkullActivity::class.java)
             startActivity(intent)
         }
+
+        val tgmButton = findViewById<Button>(R.id.TGMActivityButton)
+        tgmButton.setOnClickListener {
+            // Spustíme PuzzleActivity
+            val intent = Intent(this, TGMActivity::class.java)
+            startActivity(intent)
         }
+
+    }
     }

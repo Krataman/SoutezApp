@@ -16,6 +16,7 @@ import android.widget.GridLayout
 import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.example.utils.UIUtils
 
 data class PuzzlePiece(
     val imageView: ImageView,
@@ -51,7 +52,7 @@ class SkullActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_skull)
         screenSett(this)
-        hideSystemUI()
+        UIUtils.hideSystemUI(this);
 
         val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.kelt)
         val puzzlePieces = splitImage(originalBitmap, rows, columms)
@@ -257,27 +258,6 @@ class SkullActivity : AppCompatActivity() {
         Data.heightPX = nearestMultipleOfFive(displayHeight) / 5
         Data.widthPX = (Data.heightPX * widthRatio).toInt()
 
-    }
-
-    private fun hideSystemUI() {
-        val decorView = window.decorView
-        decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
-    }
-
-    private fun snapAllPiecesToCorrectPositions() {
-        for (piece in puzzlePiecesList) {
-            val snappedX = piece.correctX.toFloat()
-            val snappedY = piece.correctY.toFloat()
-
-            // Umístění kousku na hrací plochu
-            piece.imageView.animate()
-                .x(snappedX)
-                .y(snappedY)
-                .setDuration(200)
-                .start()
-        }
     }
 
     private fun nearestMultipleOfFive(number: Int): Int {

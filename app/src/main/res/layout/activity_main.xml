@@ -8,20 +8,42 @@
     tools:context=".MainActivity"
     android:backgroundTint="@color/white">
 
-    <Button
-        android:textColor="@color/white"
-        android:id="@+id/skullActivityButton"
-        android:layout_width="200dp"
-        android:layout_height="100dp"
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:backgroundTint="@android:color/background_dark"
-        android:text="@string/skull_activity"
-        android:textSize="20sp">
+        android:gravity="center">
 
-    </Button>
+        <Button
+            android:id="@+id/skullActivityButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@android:color/background_dark"
+            android:text="@string/keltova_lebka"
+            android:textColor="@color/white"
+            android:textSize="40sp"
+            android:padding="30dp">
+
+        </Button>
+
+        <Button
+            android:id="@+id/TGMActivityButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@android:color/background_dark"
+            android:text="@string/skull_activity"
+            android:textColor="@color/white"
+            android:textSize="40sp"
+            android:padding="30dp">
+
+        </Button>
+
+    </LinearLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

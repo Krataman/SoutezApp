@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background">
+
+    <!-- Obrázek obleku -->
+    <ImageView
+        android:id="@+id/tgm_bez_knofliku"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitCenter"
+        android:src="@drawable/tgm_bez_knofliku" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/ll1">
+
+        <ImageView
+            android:id="@+id/a9"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/tgm_knoflik" />
+
+        <ImageView
+            android:id="@+id/a10"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/tgm_knoflik" />
+
+        <ImageView
+            android:id="@+id/a11"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/tgm_knoflik" />
+
+        <ImageView
+            android:id="@+id/a12"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/tgm_knoflik" />
+
+        <ImageView
+            android:id="@+id/a13"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/tgm_knoflik" />
+
+        <ImageView
+            android:id="@+id/a14"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/tgm_knoflik" />
+
+        <ImageView
+            android:id="@+id/a15"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/tgm_knoflik" />
+
+        <ImageView
+            android:id="@+id/a16"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/tgm_knoflik" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_marginRight="64dp">
+
+        <ImageView
+            android:id="@+id/a8"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/tgm_knoflik" />
+
+        <ImageView
+            android:id="@+id/a1"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/tgm_knoflik" />
+
+        <ImageView
+            android:id="@+id/a2"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/tgm_knoflik" />
+
+        <ImageView
+            android:id="@+id/a3"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/tgm_knoflik" />
+
+        <ImageView
+            android:id="@+id/a4"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/tgm_knoflik" />
+
+        <ImageView
+            android:id="@+id/a5"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/tgm_knoflik" />
+
+        <ImageView
+            android:id="@+id/a6"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/tgm_knoflik" />
+
+        <ImageView
+            android:id="@+id/a7"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/tgm_knoflik" />
+
+    </LinearLayout>
+
+    <!-- Přetažitelný knoflík -->
+
+</FrameLayout>
