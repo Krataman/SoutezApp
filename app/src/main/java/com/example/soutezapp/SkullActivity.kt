@@ -78,9 +78,6 @@ class SkullActivity : AppCompatActivity() {
 
             imageView.setImageBitmap(pieceBitmap)
 
-            val originalX: Float = index * (0f)
-            val originalY: Float = 0f
-
             // Set layout parameters for GridLayout
             val layoutParams = GridLayout.LayoutParams().apply {
                 width = Data.widthPX
@@ -103,6 +100,10 @@ class SkullActivity : AppCompatActivity() {
 
             imageView.layoutParams = layoutParams
             puzzlePiecesContainer.addView(imageView)
+
+            // Set original positions based on the grid indices
+            val originalX = (index % columms) * Data.widthPX.toFloat() // Use column index to calculate original X
+            val originalY = (index / columms) * Data.heightPX.toFloat() // Use row index to calculate original Y
 
             puzzlePiecesList.add(PuzzlePiece(imageView, originalX, originalY, correctPosition.first, correctPosition.second))
 
