@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_background">
+    android:background="@drawable/tgm_background">
 
     <!-- Obrázek obleku -->
     <ImageView
@@ -17,7 +17,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:id="@+id/ll1">
+        android:id="@+id/ll1"
+        android:gravity="center"
+        android:layout_marginRight="128dp">
 
         <ImageView
             android:id="@+id/a9"
@@ -88,7 +90,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_marginRight="64dp">
+        android:layout_marginRight="200dp"
+        android:gravity="center">
 
         <ImageView
             android:id="@+id/a8"
