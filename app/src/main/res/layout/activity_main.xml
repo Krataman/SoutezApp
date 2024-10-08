@@ -43,6 +43,18 @@
 
         </Button>
 
+        <Button
+            android:id="@+id/dinosActivityButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@android:color/background_dark"
+            android:text="@string/dinosaurus"
+            android:textColor="@color/white"
+            android:textSize="40sp"
+            android:padding="30dp">
+
+        </Button>
+
     </LinearLayout>
 
 

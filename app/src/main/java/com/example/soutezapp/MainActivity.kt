@@ -32,5 +32,12 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        val dinoButton = findViewById<Button>(R.id.dinosActivityButton)
+        dinoButton.setOnClickListener {
+            // Spustíme PuzzleActivity
+            val intent = Intent(this, DinoActivity::class.java)
+            startActivity(intent)
+        }
+
     }
     }
